@@ -78,12 +78,52 @@ db.sales_header.aggregate([
             lines: { $push: "$lines" } // Agrupa as linhas de venda em um array
         }
     },
+
+])
+db.sales_header.aggregate([
+    {
+        $lookup: {
+            from: "sales_lines",
+            localField: "invoice_id",
+            foreignField: "invoice_id",
+            as: "lines"
+        }
+    },
+    {
+        $unwind: "$lines"
+    },
+    {
+        $group: {
+            _id: "$invoice_id",
+            date: { $first: "$date" },
+            customer_id: { $first: "$customer_id" },
+            total_with_vat_sum: { $sum: "$lines.total_with_vat" }, // Soma dos total_with_vat
+            lines: { $push: "$lines" } // Agrupa as linhas de venda em um array
+        }
+    },
     {
         $project: {
-            in
+            _id: 0, // Remove o campo _id
+            invoice_id: "$_id", // Renomeia _id para invoice_id
+            date: 1,
+            customer_id: 1,
+            total_with_vat_sum: 1, // Adiciona o campo com a soma
+            lines: {
+                $map: {
+                    input: "$lines",
+                    as: "line",
+                    in: {
+                        total_with_vat: "$$line.total_with_vat",
+                        quantity: "$$line.quantity",
+                        product_id: "$$line.product_id"
+                        // Adicione outros campos necessários
+                    }
+                }
+            }
         }
     }
 ])
+
 
 
 db.address.aggregate([
