@@ -113,15 +113,17 @@ db.sales_header.aggregate([
                     input: "$lines",
                     as: "line",
                     in: {
+                        id: "$$line.id",
                         total_with_vat: "$$line.total_with_vat",
                         quantity: "$$line.quantity",
                         product_id: "$$line.product_id"
-                        // Adicione outros campos necessários
+
                     }
                 }
             }
         }
-    }
+    },
+    { $out: "sales" }
 ])
 
 
@@ -151,6 +153,8 @@ db.address.aggregate([
         $unwind: "$country"
     }
 ])
+
+db.sales.updateMany({}, { $rename: { "total_with_vat_sum": "total" } })
 
 
 
@@ -217,5 +221,170 @@ e se fizer com mais exemplos: o 5º é {
 */
 //a venda encontrada
 db.sales_header.findOne({ invoice_id: 5638444 })
+
+
+
+
+
+
+
+
+db.products.aggregate([
+    {
+        $lookup: {
+            from: "sub_category_product",
+            localField: "id",
+            foreignField: "product_id",
+            as: "sub_category_products"
+        }
+    },
+    {
+        $unwind: "$sub_category_products"
+    },
+    {
+        $lookup: {
+            from: "sub_category",
+            localField: "sub_category_products.sub_category_id",
+            foreignField: "id",
+            as: "sub_category"
+        }
+    },
+    {
+        $unwind: "$sub_category"
+    },
+    {
+        $lookup: {
+            from: "category",
+            localField: "sub_category.category_id",
+            foreignField: "id",
+            as: "category"
+        }
+    },
+    {
+        $unwind: "$category"
+    },
+    {
+        $group: {
+            _id: "$id",
+            list_price: { $first: "$list_price" },
+            brand: { $first: "$brand" },
+            model: { $first: "$model" },
+            "5g": { $first: "$5g" },
+            processor_brand: { $first: "$processor_brand" },
+            battery_capacity: { $first: "$battery_capacity" },
+            fast_charging: { $first: "$fast_charging" },
+            ram_capacity: { $first: "$ram_capacity" },
+            internal_memory: { $first: "$internal_memory" },
+            screen_size: { $first: "$screen_size" },
+            os: { $first: "$os" },
+            primary_camera: { $first: "$primary_camera" },
+            categories: {
+                $first: {
+                    gama_precos: "$category.name",
+                    desempenho: "$sub_category.name",
+                    // ... outras categorias
+                }
+            }
+        }
+    }
+]);
+
+
+
+//lista de  todos os clientes registados
+db.fullCustomer.aggregate([
+    {
+        "$lookup": {
+            "from": "sales",
+            "localField": "id",
+            "foreignField": "customer_id",
+            "as": "customer_sales"
+        }
+    },
+    {
+        "$project": {
+            "first_name": 1,
+            "last_name": 1,
+            "email": { "$ifNull": ["$email", "desconhecido"] },
+            "address": "$address",
+            "customer_type": {
+                "$switch": {
+                    "branches": [
+                        {
+                            "case": { "$lt": ["$create_date", { "$subtract": [ISODate(), 31536000000] }] },
+                            "then": "novo"
+                        },
+                        {
+                            "case": {
+                                "$and": [
+                                    { "$gte": ["$create_date", { "$subtract": [ISODate(), 157680000000] }] },
+                                    { "$lt": ["$create_date", { "$subtract": [ISODate(), 31536000000] }] }
+                                ]
+                            },
+                            "then": "regular"
+                        },
+                        {
+                            "case": { "$gte": ["$create_date", { "$subtract": [ISODate(), 157680000000] }] },
+                            "then": "premium"
+                        }
+                    ],
+                    "default": "novo"
+                }
+            },
+            "total_purchases": {
+                "$size": {
+                    "$filter": {
+                        "input": "$customer_sales",
+                        "cond": {
+                            "$and": [
+                                { "$gte": ["$$this.date", { "$subtract": [ISODate(), 94608000000] }] },
+                                { "$lt": ["$$this.date", ISODate()] }
+                            ]
+                        }
+                    }
+                }
+            },
+            "total_purchase_value": {
+                "$sum": "$customer_sales.total"
+            }
+        }
+    }
+])
+
+//das vendas para os clientes filtrando por datas
+db.sales.aggregate([
+    {
+        "$match": {
+            "date": {
+                "$gte": ISODate("2023-01-01T00:00:00.000Z"),
+                "$lt": ISODate("2023-02-01T00:00:00.000Z")
+            }
+        }
+    },
+    {
+        "$lookup": {
+            "from": "customer",
+            "localField": "customer_id",
+            "foreignField": "id",
+            "as": "customer_info"
+        }
+    },
+    {
+        "$unwind": "$customer_info"
+    },
+    {
+        "$group": {
+            "_id": "$customer_id",
+            "first_name": { "$first": "$customer_info.first_name" },
+            "last_name": { "$first": "$customer_info.last_name" },
+            "email": { "$first": { "$ifNull": ["$customer_info.email", "desconhecido"] } },
+            "address": { "$first": "$customer_info.address" },
+            "customer_type": { "$first": "$customer_info.customer_type" },
+            "total_purchases": { "$sum": 1 },
+            "total_purchase_value": { "$sum": "$total" }
+        }
+    }
+]
+)
 
 

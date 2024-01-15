@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns="http://www.PhoneForYou.com/salesTipo"
+    targetNamespace="http://www.PhoneForYou.com/salesTipo"
+    elementFormDefault="qualified"> 
+
+
+    <!-- Definição do tipo para a linha de venda -->
+    <xs:complexType name="SaleLineType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:int"/>
+            <xs:element name="product_id" type="xs:int"/>
+            <xs:element name="quantity" type="xs:int"/>
+            <xs:element name="total_with_vat" type="xs:decimal"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Definição do tipo para o conjunto de linhas de venda -->
+    <xs:complexType name="SaleLinesType">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="line" type="SaleLineType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+    
+    <!-- Definição do tipo para a venda -->
+    <xs:complexType name="SaleType">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element name="invoice_id" type="xs:int" />
+            <xs:element name="date" type="xs:dateTime" />
+            <xs:element name="customer_id" type="xs:int" />
+            <xs:element name="total" type="xs:decimal" />
+            <xs:element name="lines" type="SaleLinesType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Definição do tipo para o conjunto de vendas -->
+    <xs:complexType name="SalesType">
+        <xs:sequence>
+            <xs:element name="sale" type="SaleType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    </xs:schema>
