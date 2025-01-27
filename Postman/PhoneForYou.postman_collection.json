@@ -1,0 +1,444 @@
+{
+	"info": {
+		"_postman_id": "330efb51-343e-4d6a-8656-085271480f7a",
+		"name": "PhoneForYou",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31183497"
+	},
+	"item": [
+		{
+			"name": "Testing",
+			"item": [
+				{
+					"name": "getCustomer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"sales\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {\r\n                /* $gte: ISODate(\"baseX-inicio-do-mes\"),\r\n                 $lt: ISODate(\"baseX-inicio-do-mes-seguinte\")*/\r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$lookup\": {\r\n            \"from\": \"customer\",\r\n            \"localField\": \"customer_id\",\r\n            \"foreignField\": \"id\",\r\n            \"as\": \"customer\"\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$customer\"\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": \"$customer.id\",\r\n            \"id\": { \"$first\": \"$customer.id\" },\r\n            \"first_name\": { \"$first\": \"$customer.first_name\" },\r\n            \"last_name\": { \"$first\": \"$customer.last_name\" },\r\n            \"email\": { \"$first\": { \"$ifNull\": [\"$customer.email\", \"desconhecido\"] } },\r\n            \"address\": {\r\n                \"$first\": {\r\n                    \"address\": \"$customer.address.address\",\r\n                    \"city\": \"$customer.address.city\",\r\n                    \"country\": \"$customer.address.country\",\r\n                    \"postal_code\": \"$customer.address.postal_code\"\r\n                }\r\n            },\r\n            \"customer_type\": { \"$first\": \"$customer.customer_type\" },\r\n            \"last3years\": { \"$first\": \"$customer.last3years\" }\r\n        }\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"_id\": 0,\r\n            \"email\":0,\r\n            \"last3years.latest_purchase_date\": 0\r\n        }\r\n    },\r\n    {\r\n        \"$sort\": {\r\n            \"id\": 1\r\n        }\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSales",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"sales\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {                \r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n      \"$project\": {\r\n        \"_id\": 0\r\n      }\r\n    },\r\n    { \r\n       \"$sort\": {\r\n          \"date\": 1\r\n    }\r\n  }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getProducts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"sales\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {                \r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$lines\"\r\n    },\r\n    {\r\n        \"$lookup\": {\r\n            \"from\": \"product\",\r\n            \"localField\": \"lines.product_id\",\r\n            \"foreignField\": \"id\",\r\n            \"as\": \"product\"\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$product\"\r\n    },\r\n\r\n    {\r\n\r\n        \"$group\": {\r\n            \"_id\": \"$product.id\",\r\n            \"brand\": { \"$first\": \"$product.brand\" },\r\n            \"model\": { \"$first\": \"$product.model\" },\r\n            \"list_price\": { \"$first\": \"$product.list_price\" },\r\n            \"categories\": { \"$first\": \"$product.categories\" }\r\n\r\n        }\r\n\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"_id\": 0,\r\n            \"id\": \"$_id\",\r\n           \"brand\": \"$brand\",\r\n            \"model\": \"$model\",\r\n            \"price\": { \"$divide\": [\"$list_price\", 100] },\r\n            \"categories\": \"$categories\"\r\n\r\n        }\r\n    },\r\n    {\r\n        \"$sort\": {\r\n           \"id\": 1\r\n        }\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCategories",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"sales\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {\r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                    \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$lines\"\r\n    },\r\n    {\r\n        \"$lookup\": {\r\n            \"from\": \"product\",\r\n            \"localField\": \"lines.product_id\",\r\n            \"foreignField\": \"id\",\r\n            \"as\": \"product\"\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$product\"\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"invoice_id\": 1,\r\n            \"categories\": \"$product.categories\"\r\n        }\r\n    },\r\n    {\r\n       \"$unwind\": \"$categories\"\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": \"$invoice_id\",\r\n            \"categories\": { \"$addToSet\": \"$categories\" }\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$categories\"\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": {\r\n                \"category_name\": \"$categories.category_name\",\r\n                \"sub_category_name\": \"$categories.sub_category_name\"\r\n            },\r\n            \"count\": { \"$sum\": 1 }\r\n        }\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": \"$_id.category_name\",\r\n            \"subcategories\": {\r\n                \"$push\": {\r\n                    \"sub_category\": \"$_id.sub_category_name\",\r\n                    \"count\": \"$count\"\r\n                }\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"_id\": 0,\r\n            \"category_name\": \"$_id\",\r\n            \"subcategories\": 1\r\n        }\r\n    }\r\n]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReturnedProducts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"returns\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {                \r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$lookup\": {\r\n            \"from\": \"product\",\r\n            \"localField\": \"product_id\",\r\n            \"foreignField\": \"id\",\r\n            \"as\": \"product\"\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$product\"\r\n    },\r\n\r\n    {\r\n\r\n        \"$group\": {\r\n            \"_id\": \"$product.id\",\r\n            \"brand\": { \"$first\": \"$product.brand\" },\r\n            \"model\": { \"$first\": \"$product.model\" },\r\n            \"list_price\": { \"$first\": \"$product.list_price\" },\r\n            \"categories\": { \"$first\": \"$product.categories\" }\r\n\r\n        }\r\n\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"_id\": 0,\r\n            \"id\": \"$_id\",\r\n           \"brand\": \"$brand\",\r\n            \"model\": \"$model\",\r\n            \"price\": { \"$divide\": [\"$list_price\", 100] },\r\n            \"categories\": \"$categories\"\r\n\r\n        }\r\n    },\r\n    {\r\n        \"$sort\": {\r\n           \"id\": 1\r\n        }\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReturnedCategories",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"returns\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {\r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                    \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$lookup\": {\r\n            \"from\": \"product\",\r\n            \"localField\": \"product_id\",\r\n            \"foreignField\": \"id\",\r\n            \"as\": \"product\"\r\n        }\r\n    },\r\n    {\r\n        \"$unwind\": \"$product\"\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"invoice_id\": 1,\r\n            \"categories\": \"$product.categories\"\r\n        }\r\n    },\r\n    {\r\n       \"$unwind\": \"$categories\"\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": {\r\n                \"category_name\": \"$categories.category_name\",\r\n                \"sub_category_name\": \"$categories.sub_category_name\"\r\n            },\r\n            \"count\": { \"$sum\": 1 }\r\n        }\r\n    },\r\n    {\r\n        \"$group\": {\r\n            \"_id\": \"$_id.category_name\",\r\n            \"subcategories\": {\r\n                \"$push\": {\r\n                    \"sub_category\": \"$_id.sub_category_name\",\r\n                    \"count\": \"$count\"\r\n                }\r\n            }\r\n        }\r\n    },\r\n    {\r\n        \"$project\": {\r\n            \"_id\": 0,\r\n            \"category_name\": \"$_id\",\r\n            \"subcategories\": 1\r\n        }\r\n    }\r\n]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReturns",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/{{content_type}}",
+								"type": "text"
+							},
+							{
+								"key": "apiKey",
+								"value": "{{api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dataSource\": \"PhoneForYouCluster\",\r\n  \"database\": \"PhoneForYou\",\r\n  \"collection\": \"returns\",\r\n  \"pipeline\": [\r\n    {\r\n        \"$match\": {\r\n            \"date\": {                \r\n                \"$gte\": {\"$date\": \"2023-01-01T00:00:00.000Z\"},\r\n                \"$lt\": {\"$date\": \"2023-02-01T00:00:00.000Z\"}\r\n            }\r\n        }\r\n    },\r\n    {\r\n      \"$project\": {\r\n        \"_id\": 0\r\n      }\r\n    },\r\n    { \r\n       \"$sort\": {\r\n          \"date\": 1\r\n    }\r\n  }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_endpoint\n}}/action/aggregate",
+							"host": [
+								"{{url_endpoint\n}}"
+							],
+							"path": [
+								"action",
+								"aggregate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "salesReport",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.35.0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://localhost:8080/sales-report?mes=1&ano=2023",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"sales-report"
+					],
+					"query": [
+						{
+							"key": "mes",
+							"value": "1"
+						},
+						{
+							"key": "ano",
+							"value": "2023"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "returnsReport",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "PostmanRuntime/7.35.0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://localhost:8080/returns-report?mes=1&ano=2023",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"returns-report"
+					],
+					"query": [
+						{
+							"key": "mes",
+							"value": "1"
+						},
+						{
+							"key": "ano",
+							"value": "2023"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
